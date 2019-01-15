@@ -9,5 +9,6 @@ namespace ChatSample.Services
         IObservable<Message> Notified { get; }
         Task SendMessage(string text);
         Task StartAsync();
+        Task StopAsync();
     }
 }

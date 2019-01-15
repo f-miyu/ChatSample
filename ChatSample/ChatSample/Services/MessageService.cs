@@ -24,7 +24,13 @@ namespace ChatSample.Services
         public async Task StartAsync()
         {
             if (_connection != null)
+            {
+                if (_connection.State == HubConnectionState.Disconnected)
+                {
+                    await _connection.StartAsync().ConfigureAwait(false);
+                }
                 return;
+            }
 
             var json = await _client.GetStringAsync(AppConstants.NegotiateUrl).ConfigureAwait(false);
 
@@ -49,6 +55,11 @@ namespace ChatSample.Services
             });
 
             await _connection.StartAsync().ConfigureAwait(false);
+        }
+
+        public async Task StopAsync()
+        {
+            await _connection?.StopAsync();
         }
 
         public async Task SendMessage(string text)

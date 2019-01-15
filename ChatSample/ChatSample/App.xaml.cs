@@ -33,5 +33,19 @@ namespace ChatSample
             containerRegistry.RegisterForNavigation<MainPage, MainPageViewModel>();
             containerRegistry.RegisterSingleton<IMessageService, MessageService>();
         }
+
+        protected override void OnResume()
+        {
+            base.OnResume();
+
+            Container.Resolve<IMessageService>().StartAsync();
+        }
+
+        protected override void OnSleep()
+        {
+            base.OnSleep();
+
+            Container.Resolve<IMessageService>().StopAsync();
+        }
     }
 }
