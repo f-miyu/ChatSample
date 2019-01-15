@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+             xmlns:ios="clr-namespace:Xamarin.Forms.PlatformConfiguration.iOSSpecific;assembly=Xamarin.Forms.Core"
+             xmlns:templateselectors="clr-namespace:ChatSample.TemplateSelectors"
+             xmlns:controls="clr-namespace:ChatSample.Controls"
+             x:Class="ChatSample.Views.MainPage" 
+             Title="{Binding Title}"
+             ios:Page.UseSafeArea="true" >
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <DataTemplate x:Key="myMessageTemplate" >
+                <ViewCell>
+                    <Grid ColumnSpacing="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Frame Grid.Column="2"
+                               Padding="10"
+                               Margin="0,10,10,10"
+                               HasShadow="false"
+                               BackgroundColor="LightGreen">
+                            <Label Text="{Binding Text}" />
+                        </Frame>
+                    </Grid>
+                </ViewCell>
+            </DataTemplate>
+            <DataTemplate x:Key="otherMessageTemplate" >
+                <ViewCell>
+                    <Grid ColumnSpacing="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="80" />
+                        </Grid.ColumnDefinitions>
+                        <Frame Grid.Column="0"
+                               Padding="10"
+                               Margin="10,10,0,10"
+                               HasShadow="false"
+                               BackgroundColor="LightBlue">
+                            <Label Text="{Binding Text}" />
+                        </Frame>
+                    </Grid>
+                </ViewCell>
+            </DataTemplate>
+            <templateselectors:MessageTemplateSelector x:Key="messageTemplateSelector"
+                                                       MyMessageTemplate="{StaticResource myMessageTemplate}"
+                                                       OtherMessageTemplate="{StaticResource otherMessageTemplate}"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <Grid RowSpacing="0" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="1" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ListView Grid.Row="0"
+                  ItemsSource="{Binding Messages}" 
+                  VerticalOptions="StartAndExpand" 
+                  SeparatorVisibility="None"
+                  SelectionMode="None"
+                  ItemTemplate="{StaticResource messageTemplateSelector}"
+                  HasUnevenRows="true" >
+        </ListView>
+        <BoxView Grid.Row="1" BackgroundColor="Gray" />
+        <Grid Grid.Row="2" Padding="8,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Editor Grid.Column="0" Text="{Binding Text.Value}" AutoSize="TextChanges" Keyboard="Chat" />
+            <Button Grid.Column="1" Text="送信" Command="{Binding SendMessageCommand}" VerticalOptions="Center"/>
+        </Grid>
+        <controls:KeyboardPadding Grid.Row="3"/>
+    </Grid>
+</ContentPage>
