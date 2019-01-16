@@ -24,45 +24,39 @@ namespace ChatSample.Services
         public async Task StartAsync()
         {
             if (_connection != null)
-            {
-                if (_connection.State == HubConnectionState.Disconnected)
+                return;
+
+            var json = await _client.GetStringAsync(AppConstants.NegotiateUrl).ConfigureAwait(false);
+
+            var info = JObject.Parse(json);
+            var url = (string)info["url"];
+            var accessToken = (string)info["accessToken"];
+
+            _connection = new HubConnectionBuilder()
+                .WithUrl(url, option =>
                 {
-                    await _connection.StartAsync().ConfigureAwait(false);
-                }
-            }
-            else
+                    option.AccessTokenProvider = () => Task.FromResult(accessToken);
+                })
+                .Build();
+
+            _connection.On<string, string>("notify", (user, text) =>
             {
-                var json = await _client.GetStringAsync(AppConstants.NegotiateUrl).ConfigureAwait(false);
-
-                var info = JObject.Parse(json);
-                var url = (string)info["url"];
-                var accessToken = (string)info["accessToken"];
-
-                _connection = new HubConnectionBuilder()
-                    .WithUrl(url, option =>
-                    {
-                        option.AccessTokenProvider = () => Task.FromResult(accessToken);
-                    })
-                    .Build();
-
-                _connection.On<string, string>("notify", (user, text) =>
+                _notified.OnNext(new Message
                 {
-                    _notified.OnNext(new Message
-                    {
-                        IsMine = _user == user,
-                        Text = text
-                    });
+                    IsMine = _user == user,
+                    Text = text
                 });
+            });
 
-                await _connection.StartAsync().ConfigureAwait(false);
-            }
+            await _connection.StartAsync().ConfigureAwait(false);
         }
 
         public async Task StopAsync()
         {
             if (_connection != null)
             {
-                await _connection.StopAsync();
+                await _connection.DisposeAsync().ConfigureAwait(false);
+                _connection = null;
             }
         }
 
