@@ -5,6 +5,7 @@ using ChatSample.Views;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using ChatSample.Services;
+using System;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace ChatSample
@@ -34,18 +35,32 @@ namespace ChatSample
             containerRegistry.RegisterSingleton<IMessageService, MessageService>();
         }
 
-        protected override void OnResume()
+        protected override async void OnResume()
         {
             base.OnResume();
 
-            Container.Resolve<IMessageService>().StartAsync();
+            try
+            {
+                await Container.Resolve<IMessageService>().StartAsync();
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+            }
         }
 
-        protected override void OnSleep()
+        protected override async void OnSleep()
         {
             base.OnSleep();
 
-            Container.Resolve<IMessageService>().StopAsync();
+            try
+            {
+                await Container.Resolve<IMessageService>().StopAsync();
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+            }
         }
     }
 }

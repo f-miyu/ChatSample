@@ -29,37 +29,41 @@ namespace ChatSample.Services
                 {
                     await _connection.StartAsync().ConfigureAwait(false);
                 }
-                return;
             }
-
-            var json = await _client.GetStringAsync(AppConstants.NegotiateUrl).ConfigureAwait(false);
-
-            var info = JObject.Parse(json);
-            var url = (string)info["url"];
-            var accessToken = (string)info["accessToken"];
-
-            _connection = new HubConnectionBuilder()
-                .WithUrl(url, option =>
-                {
-                    option.AccessTokenProvider = () => Task.FromResult(accessToken);
-                })
-                .Build();
-
-            _connection.On<string, string>("notify", (user, text) =>
+            else
             {
-                _notified.OnNext(new Message
-                {
-                    IsMine = _user == user,
-                    Text = text
-                });
-            });
+                var json = await _client.GetStringAsync(AppConstants.NegotiateUrl).ConfigureAwait(false);
 
-            await _connection.StartAsync().ConfigureAwait(false);
+                var info = JObject.Parse(json);
+                var url = (string)info["url"];
+                var accessToken = (string)info["accessToken"];
+
+                _connection = new HubConnectionBuilder()
+                    .WithUrl(url, option =>
+                    {
+                        option.AccessTokenProvider = () => Task.FromResult(accessToken);
+                    })
+                    .Build();
+
+                _connection.On<string, string>("notify", (user, text) =>
+                {
+                    _notified.OnNext(new Message
+                    {
+                        IsMine = _user == user,
+                        Text = text
+                    });
+                });
+
+                await _connection.StartAsync().ConfigureAwait(false);
+            }
         }
 
         public async Task StopAsync()
         {
-            await _connection?.StopAsync();
+            if (_connection != null)
+            {
+                await _connection.StopAsync();
+            }
         }
 
         public async Task SendMessage(string text)
